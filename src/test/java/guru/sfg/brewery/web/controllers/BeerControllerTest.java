@@ -30,8 +30,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 
 @ExtendWith(MockitoExtension.class)
 class BeerControllerTest {
@@ -145,4 +148,28 @@ class BeerControllerTest {
 
         verify(beerRepository).save(ArgumentMatchers.any());
     }
+
+    @WithMockUser("spring")
+    @Test
+    void findBeersWithUser() throws  Exception{
+        mockMvc.perform(get("/beers/find"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("beers/findBeers"))
+                .andExpect(model().attributeExists("beer"));
+    }
+
+    @Test
+    void findBeersWithHttpBasicFail() throws  Exception{
+        mockMvc.perform(get("/beers/find").with(httpBasic("foo","bar")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void findBeersWithHttpBasicSucess() throws  Exception{
+        mockMvc.perform(get("/beers/find").with(httpBasic("spring","guru")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("beers/findBeers"))
+                .andExpect(model().attributeExists("beer"));
+    }
+
 }
