@@ -24,8 +24,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true) // colocado quando usamos uma anotação para validar o acesso ao servico direto no Controller
+//@EnableGlobalMethodSecurity(securedEnabled = true) // colocado quando usamos uma anotação para validar o acesso ao servico direto no Controller
 // teste feito no controler costumer
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception{
@@ -39,12 +40,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests( auth -> {
             auth.antMatchers("/","/webjars/**", "/login","/resources/**","/beers/**").permitAll()
             .antMatchers("/beers/**").permitAll()
-            .antMatchers(HttpMethod.GET,"/api/v1/beer/**").permitAll()
-            .mvcMatchers(HttpMethod.GET,"/api/v1/beerUpc/**").hasAnyRole("ADMIN","CUSTOMER","USER")
-            .mvcMatchers(HttpMethod.DELETE,"/api/v1/beer/**").hasRole("ADMIN")
-            .mvcMatchers(HttpMethod.GET,"/brewery/api/v1/breweries/**").hasAnyRole("ADMIN","CUSTOMER")
             .antMatchers("/brewery/**").hasAnyRole("ADMIN","CUSTOMER")
             .antMatchers("/h2-console/**").permitAll();
+
+            /**
+              .antMatchers(HttpMethod.GET,"/api/v1/beer/**").permitAll()
+                    .mvcMatchers(HttpMethod.GET,"/api/v1/beerUpc/**").hasAnyRole("ADMIN","CUSTOMER","USER")
+                    .mvcMatchers(HttpMethod.DELETE,"/api/v1/beer/**").hasRole("ADMIN")
+                    .mvcMatchers(HttpMethod.POST,"/api/v1/beer/**").hasRole("ADMIN")
+                    .mvcMatchers(HttpMethod.PUT,"/api/v1/beer/**").hasRole("ADMIN")
+                    .mvcMatchers(HttpMethod.GET,"/customers/**").hasAnyRole("ADMIN","CUSTOMER")
+                    .mvcMatchers(HttpMethod.POST,"/customers/**").hasAnyRole("ADMIN","CUSTOMER")
+                    .mvcMatchers(HttpMethod.DELETE,"/customers/**").hasAnyRole("ADMIN","CUSTOMER")
+                    .mvcMatchers(HttpMethod.PUT,"/customers/**").hasAnyRole("ADMIN","CUSTOMER")
+                    .mvcMatchers(HttpMethod.GET,"/brewery/api/v1/breweries/**").hasAnyRole("ADMIN","CUSTOMER")
+             */ // nao precisa devido termos feito a configuracao direto nos controlller
         })
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
